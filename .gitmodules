@@ -1,0 +1,3 @@
+[submodule "APlot"]
+	path = APlot
+	url = https://github.com/daoxunchen/APlot.git

@@ -1,7 +1,8 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 #include "fftw.h"
-#include "Aplot\aplot.h"
+#include "Aplot\APlot.h"
+
 
 #include <algorithm>
 #include <cmath>
@@ -50,6 +51,7 @@ int main()
 	fPlot.plot(input);
 	res = dft(input);
 	fftPlot.plot(abs(res), 0, 0, "dft1", "impulses");
+
 
 #if 0
 	plotImg::waitKey();
