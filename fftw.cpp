@@ -1,58 +1,45 @@
 #include "fftw.h"
+#include "mathVal.h"
 
 #include <algorithm>
-#include <functional>
 #include <cmath>
-#include <valarray>
+#include <iterator>
+//#include <functional>
+
 using namespace std;
 
-const double PI = 3.141592653589793;
-
-fftw_complexes::fftw_complexes(const std::vector<double> &in)
+fftw_complex operator+(const fftw_complex &lhs, const fftw_complex &rhs)
 {
-	this->reserve(in.size());
-	for (double d : in) this->emplace_back(d);
+	return fftw_complex(lhs.real + rhs.real, lhs.imag + rhs.imag);
+}
+
+fftw_complex operator*(const fftw_complex &lhs, const double &rhs)
+{
+	return fftw_complex(lhs.real * rhs, lhs.imag * rhs);
+}
+
+fftw_complex operator*(const double &lhs, const fftw_complex &rhs)
+{
+	return rhs * lhs;
+}
+
+fftw_complexes operator*(const fftw_complexes &lhs, const double &rhs)
+{
+	fftw_complexes res;
+	res.reserve(lhs.size());
+	transform(lhs.begin(), lhs.end(), back_inserter(res), 
+		[&](const fftw_complex &in) {return in*rhs; });
+	return res;
+}
+
+fftw_complexes operator*(const double &lhs, const fftw_complexes &rhs)
+{
+	return rhs * lhs;
 }
 
 fftw_complex Wn(int N)
 {
-	return fftw_complex(cos(2 * PI / N), -sin(2 * PI / N));
-}
-
-fftw_complexes dft(const vector<double> &s, int N)
-{
-	N = N == 0 ? s.size() : N;
-    fftw_complexes res;
-	res.reserve(N);
-    for (auto i = 0; i < N; ++i) {
-		fftw_complex tmp;
-		double e = 2.0 * PI * i / N;
-        for (auto j = 0; j < N; j++) {
-			e *= j;
-			tmp.real += s[j] * cos(e);
-			tmp.imag += s[j] * sin(e);
-        }
-		res.push_back(tmp);
-    }
-    return res;
-}
-
-fftw_complexes idft(const vector<double> &s, int N)
-{
-	N = N == 0 ? s.size() : N;
-	fftw_complexes res;
-	res.reserve(N);
-	for (auto i = 0; i < N; ++i) {
-		fftw_complex tmp;
-		double e = 2.0 * PI * i / N;
-		for (auto j = 0; j < N; j++) {
-			e *= j;
-			tmp.real += s[j] * cos(e) / N;
-			tmp.imag += s[j] * sin(e) / N;
-		}
-		res.push_back(tmp);
-	}
-	return res;
+	return fftw_complex(cos(2 * M_PI / N), -sin(2 * M_PI / N));
 }
 
 fftw_complexes dft(const fftw_complexes &s, int N)
@@ -62,13 +49,12 @@ fftw_complexes dft(const fftw_complexes &s, int N)
 	res.reserve(N);
 	for (auto i = 0; i < N; ++i) {
 		fftw_complex tmp;
-		double e = 2.0 * PI * i / N;
+		double e = (2.0 * M_PI * i) / N;
 		for (auto j = 0; j < N; j++) {
-			e *= j;
-			double sine = sin(e);
-			double cose = cos(e);
-			tmp.real += s[j].real * cose + s[j].imag * sine;
-			tmp.imag += s[j].imag * cose - s[j].real * sine;
+			double sine = sin(e * j);
+			double cose = cos(e * j);
+			tmp += fftw_complex(s[j].real * cose + s[j].imag * sine,
+				s[j].imag * cose - s[j].real * sine);
 		}
 		res.push_back(tmp);
 	}
@@ -82,13 +68,12 @@ fftw_complexes idft(const fftw_complexes &s, int N)
 	res.reserve(N);
 	for (auto i = 0; i < N; ++i) {
 		fftw_complex tmp;
-		double e = 2.0 * PI * i / N;
+		double e = 2.0 * M_PI * i / N;
 		for (auto j = 0; j < N; j++) {
-			e *= j;
-			double sine = sin(e) / N;
-			double cose = cos(e) / N;
-			tmp.real += s[j].real * cose - s[j].imag * sine;
-			tmp.imag += s[j].imag * cose + s[j].real * sine;
+			double sine = sin(e*j) / N;
+			double cose = cos(e*j) / N;
+			tmp += fftw_complex(s[j].real * cose - s[j].imag * sine,
+				s[j].imag * cose + s[j].real * sine);
 		}
 		res.push_back(tmp);
 	}

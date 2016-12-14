@@ -19,10 +19,11 @@ using namespace APLOT;
 #define ff1 3.0
 double sinF(double t, double frequence)
 {
-	return sin(2 * PI * frequence * t);
+	//return sin(2 * M_PI * frequence * t);
+	return 0;
 }
 
-int main()
+int main1()
 {
 	vector<double> input;
 	input.reserve(N);
@@ -37,7 +38,7 @@ int main()
 	}
 	cout << "in1" << sum << endl;
 	fPlot.plot(input);
-	auto res = dft(input);
+	auto res = dft(toComplexes(input));
 	fftPlot.plot(abs(res), 0, 0, "dft", "impulses");
 		
 	for (auto i = 0; i < N; i++) {
@@ -49,7 +50,7 @@ int main()
 	}
 	cout << "in2" << sum << endl;
 	fPlot.plot(input);
-	res = dft(input);
+	res = dft(toComplexes(input));
 	fftPlot.plot(abs(res), 0, 0, "dft1", "impulses");
 
 
@@ -59,4 +60,30 @@ int main()
 	system("pause");
 #endif
     return 0;
+}
+
+int m1ain()
+{
+	vector<int> in = { 1,1,1,1,-1,-1,-1,-1 };
+	for (auto i : in) {
+		printf("%d ", i);
+	}
+	printf("\n");
+	auto m = toComplexes(in);
+	for (auto i : m) {
+		printf("m %f+%fi \n", i.real, i.imag);
+	}
+	printf("\n");
+	auto b = dft(m);
+	for (auto i : b) {
+		printf("%f+%fi \n", i.real, i.imag);
+	}
+	printf("\n");
+	auto c = idft(b);
+	for (auto i : c) {
+		printf("%f+%fi \n", i.real, i.imag);
+	}
+	printf("\n");
+	//system("pause");
+	return 0;
 }
